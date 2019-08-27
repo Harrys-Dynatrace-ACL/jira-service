@@ -240,10 +240,7 @@ func main() {
 		log.Print("[ERROR] JIRA token not defined")
 		os.Exit(1)
 	}
-	os.Exit(_main(os.Args[1:], env))
-}
 
-func _main(args []string, env envConfig) int {
 	ctx := context.Background()
 
 	t, err := cloudevents.NewHTTPTransport(
@@ -252,14 +249,13 @@ func _main(args []string, env envConfig) int {
 	)
 	if err != nil {
 		log.Printf("failed to create transport, %v", err)
-		return 1
+		return
 	}
 	c, err := cloudevents.NewClient(t)
 	if err != nil {
 		log.Printf("failed to create client, %v", err)
-		return 1
+		return
 	}
 
 	log.Fatalf("failed to start receiver: %s", c.StartReceiver(ctx, keptnHandler))
-	return 0
 }
