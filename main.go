@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	keptnevents "github.com/akirasoft/keptn-events"
 	"github.com/andygrunwald/go-jira"
 	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/kelseyhightower/envconfig"
@@ -33,58 +34,20 @@ type jiraConfig struct {
 // JiraConf declaring this in outer block so that I don't have to pedantically pass it around
 var JiraConf jiraConfig
 
-// EvaluationDoneEvent ...
-type EvaluationDoneEvent struct {
-	Githuborg          string `json:"githuborg"`
-	Project            string `json:"project"`
-	Teststrategy       string `json:"teststrategy"`
-	Deploymentstrategy string `json:"deploymentstrategy"`
-	Stage              string `json:"stage"`
-	Service            string `json:"service"`
-	Image              string `json:"image"`
-	Tag                string `json:"tag"`
-	Evaluationpassed   bool   `json:"evaluationpassed"`
-	Evaluationdetails  struct {
-		Options struct {
-			TimeStart int `json:"timeStart"`
-			TimeEnd   int `json:"timeEnd"`
-		} `json:"options"`
-		TotalScore int `json:"totalScore"`
-		Objectives struct {
-			Pass    int `json:"pass"`
-			Warning int `json:"warning"`
-		} `json:"objectives"`
-		// Data coming back from Prometheus sources is not strongly typed
-		// especially within indicatorResults
-		IndicatorResults []struct {
-			ID         string `json:"id"`
-			Violations []struct {
-				Value interface{} `json:"value"`
-				// we need to  take the key as raw json and parse it later
-				Key       json.RawMessage `json:"key"`
-				Breach    string          `json:"breach"`
-				Threshold interface{}     `json:"threshold"`
-			} `json:"violations"`
-			Score int `json:"score"`
-		} `json:"indicatorResults"`
-		Result string `json:"result"`
-	} `json:"evaluationdetails"`
-}
-
 // PrometheusKey is a json object containing job and an instance, we will use instance as it is more verbose
 type PrometheusKey struct {
 	Instance string `json:"instance"`
 	Job      string `json:"job"`
 }
 
-//keptnHandler : receives keptn events via http and sets UFO LEDs based on payload
+//keptnHandler : receives keptn events via http
 func keptnHandler(ctx context.Context, event cloudevents.Event) error {
 	var shkeptncontext string
 	event.Context.ExtensionAs("shkeptncontext", &shkeptncontext)
 
 	logger := keptnutils.NewLogger(shkeptncontext, event.Context.GetID(), "jira-service")
 
-	data := &EvaluationDoneEvent{}
+	data := &keptnevents.EvaluationDoneEvent{}
 	if err := event.DataAs(data); err != nil {
 		//TODO: replace with keptn logger
 		logger.Error(fmt.Sprintf("Got Data Error: %s", err.Error()))
@@ -113,7 +76,7 @@ func keptnHandler(ctx context.Context, event cloudevents.Event) error {
 	return nil
 }
 
-func postJIRAIssue(jiraHostname string, logger *keptnutils.Logger, data EvaluationDoneEvent, shkeptncontext string) {
+func postJIRAIssue(jiraHostname string, logger *keptnutils.Logger, data keptnevents.EvaluationDoneEvent, shkeptncontext string) {
 	var strViolationsValue string
 	var strKey string
 	var strValThreshold string
