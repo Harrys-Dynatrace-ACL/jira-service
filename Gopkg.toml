@@ -41,6 +41,10 @@
   name = "github.com/keptn/go-utils"
   branch = "develop"
 
+[[constraint]]
+  name = "github.com/akirasoft/keptn-events"
+  branch = "main"
+
 [prune]
   go-tests = true
   unused-packages = true
