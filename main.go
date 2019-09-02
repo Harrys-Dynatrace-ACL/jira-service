@@ -15,7 +15,6 @@ import (
 	"github.com/andygrunwald/go-jira"
 	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/kelseyhightower/envconfig"
-	keptnutils "github.com/keptn/go-utils/pkg/utils"
 )
 
 type envConfig struct {
@@ -45,12 +44,12 @@ func keptnHandler(ctx context.Context, event cloudevents.Event) error {
 	var shkeptncontext string
 	event.Context.ExtensionAs("shkeptncontext", &shkeptncontext)
 
-	logger := keptnutils.NewLogger(shkeptncontext, event.Context.GetID(), "jira-service")
+	//logger := keptnutils.NewLogger(shkeptncontext, event.Context.GetID(), "jira-service")
 
 	data := &keptnevents.EvaluationDoneEvent{}
 	if err := event.DataAs(data); err != nil {
 		//TODO: replace with keptn logger
-		logger.Error(fmt.Sprintf("Got Data Error: %s", err.Error()))
+		//logger.Error(fmt.Sprintf("Got Data Error: %s", err.Error()))
 		return err
 	}
 
@@ -61,7 +60,7 @@ func keptnHandler(ctx context.Context, event cloudevents.Event) error {
 	if event.Type() != "sh.keptn.events.evaluation-done" {
 		const errorMsg = "Received unexpected keptn event"
 		//TODO: replace with keptn logger
-		logger.Error(errorMsg)
+		//logger.Error(errorMsg)
 		return errors.New(errorMsg)
 	}
 
@@ -69,14 +68,15 @@ func keptnHandler(ctx context.Context, event cloudevents.Event) error {
 		if data.Evaluationpassed != true {
 			//TODO: replace with keptn logger
 			//don't put token in logs:
-			logger.Info(fmt.Sprintf("Using JiraConfig: Hostname:%s, Username:%s, Project:%s", JiraConf.Hostname, JiraConf.Username, JiraConf.Project))
-			go postJIRAIssue(JiraConf.Hostname, logger, *data, shkeptncontext)
+			//logger.Info(fmt.Sprintf("Using JiraConfig: Hostname:%s, Username:%s, Project:%s", JiraConf.Hostname, JiraConf.Username, JiraConf.Project))
+			//go postJIRAIssue(JiraConf.Hostname, logger, *data, shkeptncontext)
+			go postJIRAIssue(JiraConf.Hostname, *data, shkeptncontext)
 		}
 	}
 	return nil
 }
 
-func postJIRAIssue(jiraHostname string, logger *keptnutils.Logger, data keptnevents.EvaluationDoneEvent, shkeptncontext string) {
+func postJIRAIssue(jiraHostname string, data keptnevents.EvaluationDoneEvent, shkeptncontext string) {
 	var strViolationsValue string
 	var strKey string
 	var strValThreshold string
@@ -171,13 +171,14 @@ func postJIRAIssue(jiraHostname string, logger *keptnutils.Logger, data keptneve
 		// all this stuff is necessary to get back the response from JIRA if there is an error
 		bodyBytes, _ := ioutil.ReadAll(response.Response.Body)
 		bodyString := string(bodyBytes)
-		logger.Error(fmt.Sprintf("JIRA returned: %s\n", bodyString))
+		log.Printf("Jira returned %s\n", bodyString)
+		//logger.Error(fmt.Sprintf("JIRA returned: %s\n", bodyString))
 		panic(err)
 	}
 
 	// use keptn logger
-	logger.Info(fmt.Sprintf("JIRA returned Key:%s, ID:%+v\n", issue.Key, issue.ID))
-
+	//logger.Info(fmt.Sprintf("JIRA returned Key:%s, ID:%+v\n", issue.Key, issue.ID))
+	log.Printf("JIRA returned Key:%s, ID:%+v\n", issue.Key, issue.ID)
 }
 
 func main() {

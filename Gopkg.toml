@@ -38,10 +38,6 @@
   version = "1.4.0"
 
 [[constraint]]
-  name = "github.com/keptn/go-utils"
-  branch = "develop"
-
-[[constraint]]
   name = "github.com/akirasoft/keptn-events"
   branch = "master"
 

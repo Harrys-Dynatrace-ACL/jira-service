@@ -10,3 +10,4 @@ vendor/*
 *.so
 *.dylib
 jira-service
+Gopkg.lock
