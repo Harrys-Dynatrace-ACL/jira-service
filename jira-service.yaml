@@ -63,9 +63,9 @@ spec:
               key: DT_TENANT
               optional: true
         - name: KEPTN_DOMAIN
-          value: 'http://keptn-domain-here'
+          value: 'http://keptn.54.144.62.54.nip.io/'
         - name: KEPTN_BRIDGE_URL
-          value: ''
+          value: 'http://keptn.54.144.62.54.nip.io/bridge'
 ---
 apiVersion: v1
 kind: Service
